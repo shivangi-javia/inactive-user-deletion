@@ -50,38 +50,50 @@ function inactive_user_deletion_plugin_menu() {
 
 // Display settings page and save options
 function inactive_user_deletion_page() {
-    if (isset($_POST['iud_days_active'])) {
-        $iud_days_active = sanitize_text_field($_POST['iud_days_active']);
-        update_option('iud_days_active', $iud_days_active);
-    }
-    if (isset($_POST['iud_warning_days_first'])) {
-        $iud_warning_days_first = sanitize_text_field($_POST['iud_warning_days_first']);
-        update_option('iud_warning_days_first', $iud_warning_days_first);
-    }
-    if (isset($_POST['iud_warning_days_final'])) {
-        $iud_warning_days_final = sanitize_text_field($_POST['iud_warning_days_final']);
-        update_option('iud_warning_days_final', $iud_warning_days_final);
-    }
-    if (isset($_POST['iud_email_subject_first'])) {
-        $iud_email_subject_first = sanitize_text_field($_POST['iud_email_subject_first']);
-        update_option('iud_email_subject_first', $iud_email_subject_first);
-    }
-    if (isset($_POST['iud_email_message_first'])) {
-        $iud_email_message_first = sanitize_textarea_field($_POST['iud_email_message_first']);
-        update_option('iud_email_message_first', $iud_email_message_first);
-    }
-    if (isset($_POST['iud_email_subject_final'])) {
-        $iud_email_subject_final = sanitize_text_field($_POST['iud_email_subject_final']);
-        update_option('iud_email_subject_final', $iud_email_subject_final);
-    }
-    if (isset($_POST['iud_email_message_final'])) {
-        $iud_email_message_final = sanitize_textarea_field($_POST['iud_email_message_final']);
-        update_option('iud_email_message_final', $iud_email_message_final);
-    }
-    if (isset($_POST['iud_disable_emails']) && $_POST['iud_disable_emails'] == '1') {
-        update_option('iud_disable_emails', true);
-    } else {
-        update_option('iud_disable_emails', false);
+    // Ensure wp_unslash is used on nonce before verification
+    if (isset($_POST['iud_form_nonce'])) {
+        // Sanitize the nonce
+        $nonce = sanitize_text_field(wp_unslash($_POST['iud_form_nonce'])); 
+        // Verify the nonce
+        if (wp_verify_nonce($nonce, 'iud_form_action')) {
+            // Process form data and update options if nonce is verified
+            if (isset($_POST['iud_days_active'])) {
+                $iud_days_active = sanitize_text_field(wp_unslash($_POST['iud_days_active']));
+                update_option('iud_days_active', $iud_days_active);
+            }
+            if (isset($_POST['iud_warning_days_first'])) {
+                $iud_warning_days_first = sanitize_text_field(wp_unslash($_POST['iud_warning_days_first']));
+                update_option('iud_warning_days_first', $iud_warning_days_first);
+            }
+            if (isset($_POST['iud_warning_days_final'])) {
+                $iud_warning_days_final = sanitize_text_field(wp_unslash($_POST['iud_warning_days_final']));
+                update_option('iud_warning_days_final', $iud_warning_days_final);
+            }
+            if (isset($_POST['iud_email_subject_first'])) {
+                $iud_email_subject_first = sanitize_text_field(wp_unslash($_POST['iud_email_subject_first']));
+                update_option('iud_email_subject_first', $iud_email_subject_first);
+            }
+            if (isset($_POST['iud_email_message_first'])) {
+                $iud_email_message_first = sanitize_textarea_field(wp_unslash($_POST['iud_email_message_first']));
+                update_option('iud_email_message_first', $iud_email_message_first);
+            }
+            if (isset($_POST['iud_email_subject_final'])) {
+                $iud_email_subject_final = sanitize_text_field(wp_unslash($_POST['iud_email_subject_final']));
+                update_option('iud_email_subject_final', $iud_email_subject_final);
+            }
+            if (isset($_POST['iud_email_message_final'])) {
+                $iud_email_message_final = sanitize_textarea_field(wp_unslash($_POST['iud_email_message_final']));
+                update_option('iud_email_message_final', $iud_email_message_final);
+            }
+            if (isset($_POST['iud_disable_emails']) && $_POST['iud_disable_emails'] == '1') {
+                update_option('iud_disable_emails', true);
+            } else {
+                update_option('iud_disable_emails', false);
+            }
+        } else {
+            // If nonce verification fails, display an error message
+            echo '<div class="error"><p><strong>Nonce verification failed. Please try again.</strong></p></div>';
+        }
     }
 
     $iud_days_active = get_option('iud_days_active', 45); // Default to 45 days if not set
@@ -105,6 +117,7 @@ function inactive_user_deletion_page() {
     <p>Use the options below to configure the number of days a user can remain inactive before their account is deleted. You can also adjust when warning emails will be sent prior to deletion. Additionally, you can personalize the content of the first and final warning emails. If needed, you can disable these warning emails entirely.</p>
     
     <form method="POST">
+        <?php wp_nonce_field('iud_form_action', 'iud_form_nonce'); ?>  <!-- Nonce Field -->
         <table class="form-table">
             <tbody>
                 <!-- Delete After Inactive Days and Disable Emails Section -->
@@ -178,7 +191,7 @@ add_filter('manage_users_custom_column', 'iud_display_last_login_column', 10, 3)
 function iud_display_last_login_column($output, $column_id, $user_id) {
     if ($column_id == 'last_login') {
         $last_login = get_user_meta($user_id, 'last_login', true);
-        $output = $last_login ? '<div title="Last login: ' . date('F j, Y, g:i a', $last_login) . '">' . human_time_diff($last_login) . '</div>' : 'No record';
+        $output = $last_login ? '<div title="Last login: ' . gmdate('F j, Y, g:i a', $last_login) . '">' . human_time_diff($last_login) . '</div>' : 'No record';
     }
     return $output;
 }
@@ -215,8 +228,8 @@ function iud_delete_inactive_users() {
     foreach ($users as $user) {
         $last_login = get_user_meta($user->ID, 'last_login', true);
         if ($last_login) {
-            $last_active = date('F j, Y, g:i a', $last_login);
-            $today = date('F j, Y, g:i a');
+            $last_active = gmdate('F j, Y, g:i a', $last_login);
+            $today = gmdate('F j, Y, g:i a');
             $start = new DateTime($last_active);
             $end = new DateTime($today);
 
