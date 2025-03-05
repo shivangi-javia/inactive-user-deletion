@@ -195,7 +195,7 @@ function iaud_add_last_login_column($columns) {
 add_action('manage_users_custom_column', 'iaud_post_count_column_content', 10, 3);
 function iaud_post_count_column_content($value, $column_name, $user_id) {
     // "Last Login"
-    if ($column_id == 'last_login') {
+    if ($column_name == 'last_login') {
         $last_login = get_user_meta($user_id, 'last_login', true);
         $value = $last_login ? '<div title="Last login: ' . gmdate('F j, Y, g:i a', $last_login) . '">' . human_time_diff($last_login) . '</div>' : 'No record';
     }
