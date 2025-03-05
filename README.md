@@ -1,4 +1,5 @@
 === Inactive User Deletion ===
+
 Contributors: shivangijavia2106
 Requires at least: 5.0
 Tested up to: 6.7
@@ -7,10 +8,11 @@ Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Automatically deletes users inactive for a set number of days.
+Automatically deletes users inactive for a set number of days and assigns their posts to a selected user or admin before deletion.
 
 == Description ==
-The Inactive User Deletion plugin automatically deletes users who have been inactive for a set number of days. You can configure the number of days a user must be inactive before their account is deleted. Additionally, this plugin allows you to send warning emails before the deletion process, which can be customized or disabled entirely.
+The Inactive User Deletion plugin helps you manage user accounts that have been inactive for a set number of days by automatically deleting them. The plugin allows you to configure the number of days a user must remain inactive before deletion. Additionally, you can send warning emails to users before their account is deleted. These emails are customizable or can be disabled entirely. Before deleting the user, all their posts will be reassigned to a selected user or admin to prevent content loss.
+
 
 == Features ==
 
@@ -20,6 +22,8 @@ The Inactive User Deletion plugin automatically deletes users who have been inac
 - Option to modify the number of inactive days, and the timing for sending warning emails.
 - Option to personalize the subject and content of the warning emails.
 - Adds a "Last Login" column in the Users list in the admin panel.
+- Assigns all posts of the inactive user to a selected user or admin before deleting the user.
+
 
 == Installation ==
 1. Download the plugin ZIP file.
@@ -39,6 +43,10 @@ Once the plugin is activated, you can configure the settings by following these 
    - **Delete After Inactive Days**:
      - Set the number of days of inactivity before the user is deleted.
      - **Default value**: 45 days.
+
+   - **Assign Posts Before Deletion**:
+     - Select a user (admin or another user) to whom the posts of the inactive user will be assigned before deletion.
+     - **Default value**: Select the "admin" or any other user as needed.
 
    - **First Warning**:
      - **Days Before First Warning Email**: Set how many days before deletion the first warning email should be sent.
@@ -88,6 +96,7 @@ This plugin schedules a cron job to check for inactive users and delete them aut
 
 - The email subject and content can be customized by editing the options in the settings page.
 - You can also change the number of days for inactivity and the warning periods for the emails.
+- Post reassignment can be easily modified by selecting a new user or admin under the settings.
 
 == Support ==
 
